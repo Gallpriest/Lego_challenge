@@ -1,0 +1,26 @@
+:root {
+    /* space variables [base=4px] */
+    --space-x1: 4px;
+    --space-x2: 8px;
+    --space-x3: 16px;
+    --space-x4: 24px;
+
+    /* border variables */
+    --border-default: 1px solid #000000;
+
+    /* font-size variables */
+    --font-small: 14px;
+    --font-medium: 16px;
+    --font-large: 24px;
+
+    /* font-weight variables */
+    --font-weight-400: 400;
+    --font-weight-500: 500;
+    --font-weight-600: 600;
+    --font-weight-900: 900;
+
+    /* line-height variables */
+    --line-height-small: 18px;
+    --line-height-medium: 20px;
+    --line-height-large: 28px;
+}
