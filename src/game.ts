@@ -225,7 +225,7 @@ class Game {
     /** Load all scene models and store */
     loadModels = () => {
         ['lego_water', 'lego_boat', 'lego_cannon', 'lego_crystall', 'lego_map'].forEach((key: string) => {
-            this.loader.load(`../assets/${key}.glb`, (gltf) => {
+            this.loader.load(`/${key}.glb`, (gltf) => {
                 this.models[key] = gltf;
                 this.adjustModelSettings(key, gltf);
             });
