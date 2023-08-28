@@ -91,9 +91,10 @@ class Game {
         this.loader.setDRACOLoader(this.dracoLoader);
     }
 
-    updateUIStats = (health?: number, targets?: number) => {
+    updateUIStats = (health?: number, targets?: number, money?: number) => {
         document.body.querySelector('.js-health-stat')!.textContent = `${health ?? this.state.totalHealth}`;
         document.body.querySelector('.js-target-stat')!.textContent = `${targets ?? this.targets.amount}`;
+        document.body.querySelector('.js-money-stat')!.textContent = `${money ?? this.state.money}`;
     };
 
     /** Start the game by sending enemies */
@@ -107,7 +108,8 @@ class Game {
 
     /** Restart the game by reseting the settings */
     restartGame = () => {
-        this.updateUIStats(3, 10);
+        this.toggleUI();
+        this.updateUIStats(3, 30, 50);
         this.state.resetHealth();
         this.targets.resetTargetSystem();
         this.towers.resetTowerSystem();
@@ -216,6 +218,10 @@ class Game {
                 this.adjustModelSettings(key, gltf);
             });
         });
+    };
+
+    toggleUI = () => {
+        document.body.querySelector('.menu__list')!.classList.toggle('js-disabled');
     };
 
     generateFog = () => {

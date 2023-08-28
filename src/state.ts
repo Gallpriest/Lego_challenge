@@ -12,6 +12,7 @@ class GameState {
     game: Game;
     totalHealth: number;
     globalState: 'default' | 'creation';
+    money: number;
     previewObservers: ObserversState;
 
     active: boolean = false;
@@ -30,7 +31,16 @@ class GameState {
         this.draggableObject = null;
         this.globalState = 'default';
         this.totalHealth = 3;
+        this.money = 50;
     }
+
+    addMoney = (value: number) => {
+        this.money += value;
+    };
+
+    payForTower = () => {
+        this.money -= 50;
+    };
 
     /** Reduce the total health on the current map */
     reduceHealth = () => {
@@ -50,6 +60,10 @@ class GameState {
     /** Update the global state while performing CRUD actions */
     updateGlobalState = (value: typeof this.globalState) => {
         this.globalState = value;
+
+        if (value === 'creation') this.game.towers.toggleTowersRange(1);
+
+        if (value === 'default') this.game.towers.toggleTowersRange(0);
     };
 
     /** Update the draggable object and start moving event */

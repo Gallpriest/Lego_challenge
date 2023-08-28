@@ -110,8 +110,10 @@ class GameEvents {
 
     /** Tower adding listener */
     towerAddListener = () => {
-        if (this.game.towers.activeTower && !this.game.towers.activeTower.created) {
+        if (this.game.towers.activeTower && !this.game.towers.activeTower.created && this.game.state.money >= 50) {
             this.game.towers.activeTower.placeTheTower();
+            this.game.state.payForTower();
+            this.game.updateUIStats();
         }
     };
 

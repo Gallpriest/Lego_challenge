@@ -7,7 +7,7 @@ function initUI(game: Game) {
     if (startButton) {
         startButton.addEventListener('pointerup', () => {
             game.startGame();
-            document.body.querySelector('.js-disabled')?.classList.toggle('js-disabled');
+            game.toggleUI();
             startButton.style.display = 'none';
         });
     }

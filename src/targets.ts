@@ -8,6 +8,7 @@ class Target {
     mesh: Group;
     uuid: string;
     speed: number;
+    health: number;
     clock: Clock;
 
     readonly halfRotation = 1.57;
@@ -21,12 +22,13 @@ class Target {
     targetFrameId: number | null;
     controlPoints: { points: Vector3; direction?: 'forward' | 'backward' | 'left' | 'right' }[] = [];
 
-    constructor(game: Game) {
+    constructor(game: Game, speed: number, health: number) {
         this.game = game;
         this.mesh = this.game.models['boat']!.scenes[0].clone();
         this.clock = new Clock();
 
-        this.speed = 0.5;
+        this.speed = speed;
+        this.health = health;
         this.prevTurn = 0;
         this.triggered = false;
         this.pointsReached = 1;
@@ -42,6 +44,7 @@ class Target {
 
     /** Apply default target settings */
     applySettings = () => {
+        this.mesh.name = 'TARGET';
         this.mesh.userData = { health: 0 };
         this.mesh.uuid = this.uuid;
         this.mesh.position.y = 1.3;
@@ -143,26 +146,60 @@ class TargetSystem {
     targets: Target[];
     frequency: number;
     amount: number;
+    healthLevels: number[];
+    targetSpeed: number[];
 
     constructor(game: Game) {
         this.game = game;
-        this.frequency = 2600;
-        this.amount = 10;
+        this.frequency = 3000;
+        this.amount = 30;
         this.targets = [];
+        this.healthLevels = [100, 150, 200];
+        this.targetSpeed = [0.025, 0.05, 0.08];
     }
+
+    getSpeed = () => {
+        switch (true) {
+            case this.amount < 10:
+                return this.targetSpeed[2];
+            case this.amount < 20:
+                return this.targetSpeed[1];
+            case this.amount < 30:
+                return this.targetSpeed[0];
+            default:
+                return this.targetSpeed[0];
+        }
+    };
+
+    getHealthLevel = () => {
+        switch (true) {
+            case this.amount < 10:
+                return this.healthLevels[2];
+            case this.amount < 20:
+                return this.healthLevels[1];
+            case this.amount < 30:
+                return this.healthLevels[0];
+            default:
+                return this.healthLevels[0];
+        }
+    };
 
     /** Reset target system values */
     resetTargetSystem = () => {
-        this.amount = 10;
+        this.amount = 30;
         this.targets = [];
     };
 
+    /** Delete all the targets on the map */
     deleteAllTargets = () => {
         this.targets.forEach((t) => {
             this.game.scene.remove(t.mesh);
+            window.cancelAnimationFrame(t.targetFrameId!);
         });
+        this.targets = [];
     };
 
+    /** Cancel sending targets */
     cancelInterval = () => {
         clearInterval(this.game.interalTargetsID!);
         this.game.interalTargetsID = null;
@@ -175,8 +212,6 @@ class TargetSystem {
 
         if (this.amount === 0) {
             this.cancelInterval();
-            this.deleteAllTargets();
-            this.cancelInterval();
         }
     };
 
@@ -184,7 +219,7 @@ class TargetSystem {
     createTarget = () => {
         this.decreaseAmount();
 
-        const target = new Target(this.game);
+        const target = new Target(this.game, this.getSpeed(), this.getHealthLevel());
 
         this.targets.push(target);
     };
@@ -196,6 +231,8 @@ class TargetSystem {
                 this.game.scene.remove(target.mesh);
                 window.cancelAnimationFrame(target.targetFrameId!);
                 reduceHealth && this.game.state.reduceHealth();
+                this.game.state.addMoney(10);
+                this.game.updateUIStats();
                 return false;
             }
 
@@ -208,6 +245,7 @@ class TargetSystem {
             !document.body.querySelector('.js-modal-show')
         ) {
             this.game.events.resetEvents();
+            this.game.toggleUI();
             document.body.querySelector('#victory-modal')?.classList.toggle('js-modal-show');
             return;
         }
@@ -215,6 +253,7 @@ class TargetSystem {
         if (this.game.state.totalHealth === 0 && !document.body.querySelector('.js-modal-show')) {
             this.cancelInterval();
             this.deleteAllTargets();
+            this.game.toggleUI();
             this.game.events.resetEvents();
             document.body.querySelector('#restart-modal')?.classList.toggle('js-modal-show');
             return;

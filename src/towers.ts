@@ -41,6 +41,12 @@ class TowerSystem {
         this.clock = new Clock();
     }
 
+    improveTowerStats = () => {
+        for (const key in this.towers) {
+            this.towers[key].attackSpeed -= 125;
+        }
+    };
+
     /** Reset all towers and settings */
     resetTowerSystem = () => {
         this.activeBase = null;
@@ -56,6 +62,12 @@ class TowerSystem {
         }
 
         this.bases.forEach((base) => (base.userData.occupied = false));
+    };
+
+    toggleTowersRange = (value: number) => {
+        for (const key in this.towers) {
+            this.towers[key].toggleRangeGroup(value);
+        }
     };
 
     /** Assign "Crystall" model as a pointer for a base */
@@ -261,7 +273,10 @@ class Tower {
                 } = this.range;
 
                 if (x >= minX && x <= maxX && z >= minZ && z <= maxZ) {
-                    if (!this.focusedTarget && target.mesh.userData.health !== 100) {
+                    if (
+                        !this.focusedTarget &&
+                        target.mesh.userData.health <= this.system.game.targets.getHealthLevel()
+                    ) {
                         this.setNewTarget(target);
                         break;
                     }
@@ -280,23 +295,16 @@ class Tower {
     shootTarget = () => {
         if (this.focusedTarget && !this.shootingIntervalId) {
             this.shootingIntervalId = setInterval(() => {
-                if (this.focusedTarget?.mesh.userData.health === 100) {
+                if (this.focusedTarget?.mesh.userData.health >= this.focusedTarget!.health) {
                     this.stopShooting();
-                    this.system.game.targets.deleteTarget(this.focusedTarget, false);
+                    this.system.game.targets.deleteTarget(this.focusedTarget!, false);
                     this.setNewTarget(null);
 
                     return;
                 }
 
-                if (this.focusedTarget?.mesh.userData.health !== 100) {
+                if (this.focusedTarget?.mesh.userData.health <= this.focusedTarget!.health) {
                     new Projectile(this.system.game, this);
-                    if (this.focusedTarget?.mesh.userData.health === 100) {
-                        this.stopShooting();
-                        this.system.game.targets.deleteTarget(this.focusedTarget, false);
-                        this.setNewTarget(null);
-
-                        return;
-                    }
                 }
             }, this.attackSpeed);
         }
@@ -360,10 +368,13 @@ class Projectile {
             x: this.tower.focusedTarget!.mesh.position.x,
             y: this.tower.focusedTarget!.mesh.position.y,
             z: this.tower.focusedTarget!.mesh.position.z,
-            duration: 1,
+            duration: 0.75,
             onComplete: () => {
-                if (this.tower.focusedTarget && this.tower.focusedTarget?.mesh.userData.health !== 100) {
-                    this.tower.focusedTarget.mesh.userData.health += 25;
+                if (
+                    this.tower.focusedTarget &&
+                    this.tower.focusedTarget?.mesh.userData.health <= this.tower.focusedTarget.health
+                ) {
+                    this.tower.focusedTarget.mesh.userData.health += 50;
                     this.game.scene.remove(this.mesh);
                 } else {
                     this.game.scene.remove(this.mesh);
