@@ -8,7 +8,10 @@ import {
     MeshBasicMaterial,
     PlaneGeometry,
     Vector3,
-    Clock
+    RingGeometry,
+    Clock,
+    EdgesGeometry,
+    LineSegments
 } from 'three';
 import gsap from 'gsap';
 
@@ -48,6 +51,7 @@ class TowerSystem {
 
         for (const key in this.towers) {
             this.towers[key].created = false;
+            this.towers[key].toggleRangeGroup(0);
             this.toggleTowerMaterials(0, this.towers[key]);
         }
 
@@ -145,11 +149,13 @@ class Tower {
     attackSpeed: number;
     shootingIntervalId: number | null;
     focusedTarget: Target | null;
+    rangeGroup: Group;
 
     constructor(system: TowerSystem) {
         this.system = system;
         this.model = new Group();
         this.uuid = '';
+        this.rangeGroup = new Group();
         this.focusedTarget = null;
         this.shootingIntervalId = null;
         this.attackSpeed = 1000;
@@ -162,7 +168,7 @@ class Tower {
 
     /** Create a new tower model with fresh materials */
     createNewModel = (x: number, y: number, z: number) => {
-        this.model = this.system.game.models['lego_cannon']!.scenes[0].clone();
+        this.model = this.system.game.models['cannon']!.scenes[0].clone();
         this.model.name = 'Tower';
         this.model.position.set(x, y, z);
         this.model.scale.set(0, 0, 0);
@@ -175,7 +181,14 @@ class Tower {
         this.created = true;
         this.model.scale.set(1, 1, 1);
         this.system.excludeBase(this.uuid);
+        this.toggleRangeGroup(1);
         this.towerLoop();
+    };
+
+    toggleRangeGroup = (value: number) => {
+        this.rangeGroup.children.forEach((child) => {
+            (child as Mesh<any, any>).material.opacity = value;
+        });
     };
 
     /** Update a current target value */
@@ -194,22 +207,36 @@ class Tower {
     /** Define range parameters depending on the placement */
     defineRange = () => {
         const plane = new Mesh(
-            new PlaneGeometry(10, 10, 4, 4),
-            new MeshBasicMaterial({ color: 'aqua', transparent: true, opacity: 0.1, wireframe: true })
+            new PlaneGeometry(15, 15, 4, 4),
+            new MeshBasicMaterial({ color: 'black', transparent: true, opacity: 1, wireframe: false })
         );
+
+        const radius = new Mesh(
+            new RingGeometry(8, 8.2, 64),
+            new MeshBasicMaterial({ color: 'green', transparent: true, opacity: 0 })
+        );
+        const edges = new EdgesGeometry(new RingGeometry(8, 8.2, 64));
+        const lines = new LineSegments(edges, new MeshBasicMaterial({ color: 'black', transparent: true, opacity: 0 }));
 
         const center = this.system.game.utils.getBoxCenter(this.model);
 
         plane.rotation.x = -Math.PI / 2;
-        plane.position.y = 2.2;
+        plane.position.y = this.model.position.y + 1;
         plane.position.x = center.x;
         plane.position.z = center.z;
+
+        this.rangeGroup.rotation.x = -Math.PI / 2;
+        this.rangeGroup.position.y = this.model.position.y + 1;
+        this.rangeGroup.position.x = center.x;
+        this.rangeGroup.position.z = center.z;
+
+        this.rangeGroup.add(radius, lines);
 
         const r = this.system.game.utils.getBox(plane);
         this.range.x = [r.min.x, r.max.x];
         this.range.z = [r.min.z, r.max.z];
 
-        this.system.game.scene.add(plane);
+        this.system.game.scene.add(this.rangeGroup);
     };
 
     /** Detect a target based on a range */
@@ -306,7 +333,7 @@ class Projectile {
     constructor(game: Game, tower: Tower) {
         this.game = game;
         this.tower = tower;
-        this.mesh = this.game.models['lego_cannon']!.scenes[0].children.find((obj) =>
+        this.mesh = this.game.models['cannon']!.scenes[0].children.find((obj) =>
             obj.name.includes('Shell')
         )!.clone() as Mesh;
         this.uuid = this.game.utils.getUUID();

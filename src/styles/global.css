@@ -20,6 +20,9 @@
 */
 html,
 body {
+    color: var(--color-text);
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
     height: 100%;
 }
 /*

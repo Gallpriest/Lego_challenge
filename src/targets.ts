@@ -1,11 +1,11 @@
-import { Clock, Mesh, Vector3 } from 'three';
+import { Clock, Group, Vector3 } from 'three';
 import gsap from 'gsap';
 
 import Game from './game';
 
 class Target {
     game: Game;
-    mesh: Mesh;
+    mesh: Group;
     uuid: string;
     speed: number;
     clock: Clock;
@@ -23,10 +23,10 @@ class Target {
 
     constructor(game: Game) {
         this.game = game;
-        this.mesh = this.game.models['lego_boat']?.scenes[0].clone() as any;
+        this.mesh = this.game.models['boat']!.scenes[0].clone();
         this.clock = new Clock();
 
-        this.speed = 0.025;
+        this.speed = 0.5;
         this.prevTurn = 0;
         this.triggered = false;
         this.pointsReached = 1;
@@ -118,6 +118,10 @@ class Target {
                 this.mesh.position.x -= this.speed;
                 this.mesh.rotation.z = Math.sin(t) * 0.13;
                 break;
+            case this.game.state.totalHealth === 0:
+                window.cancelAnimationFrame(this.targetFrameId!);
+                this.targetFrameId = null;
+                return;
             default:
                 this.increasePoint();
                 this.makeTurn();
@@ -143,23 +147,36 @@ class TargetSystem {
     constructor(game: Game) {
         this.game = game;
         this.frequency = 2600;
-        this.amount = 2;
+        this.amount = 10;
         this.targets = [];
     }
 
     /** Reset target system values */
     resetTargetSystem = () => {
-        this.amount = 2;
+        this.amount = 10;
         this.targets = [];
+    };
+
+    deleteAllTargets = () => {
+        this.targets.forEach((t) => {
+            this.game.scene.remove(t.mesh);
+        });
+    };
+
+    cancelInterval = () => {
+        clearInterval(this.game.interalTargetsID!);
+        this.game.interalTargetsID = null;
     };
 
     /** Decrease an amount of targets to be generated */
     decreaseAmount = () => {
         this.amount -= 1;
+        this.game.updateUIStats();
 
         if (this.amount === 0) {
-            clearInterval(this.game.interalTargetsID!);
-            this.game.interalTargetsID = null;
+            this.cancelInterval();
+            this.deleteAllTargets();
+            this.cancelInterval();
         }
     };
 
@@ -196,6 +213,8 @@ class TargetSystem {
         }
 
         if (this.game.state.totalHealth === 0 && !document.body.querySelector('.js-modal-show')) {
+            this.cancelInterval();
+            this.deleteAllTargets();
             this.game.events.resetEvents();
             document.body.querySelector('#restart-modal')?.classList.toggle('js-modal-show');
             return;

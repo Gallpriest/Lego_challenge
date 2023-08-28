@@ -29,16 +29,22 @@ class GameState {
         };
         this.draggableObject = null;
         this.globalState = 'default';
-        this.totalHealth = 1;
+        this.totalHealth = 3;
     }
 
     /** Reduce the total health on the current map */
     reduceHealth = () => {
         this.totalHealth -= 1;
+        this.game.updateUIStats();
+
+        if (this.totalHealth === 0) {
+            this.game.targets.cancelInterval();
+            this.game.targets.deleteAllTargets();
+        }
     };
 
     resetHealth = () => {
-        this.totalHealth = 1;
+        this.totalHealth = 3;
     };
 
     /** Update the global state while performing CRUD actions */

@@ -81,7 +81,7 @@ class GamePath {
 
             for (let j = 0; j < 4; j++) {
                 const [v1, v2] = this.shifts[j];
-                const mesh = this.game.models['lego_water']!.scenes[0].clone();
+                const mesh = this.game.models['water']!.scenes[0].clone();
                 const water = new WaterBlock(
                     mesh,
                     j + i,

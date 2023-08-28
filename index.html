@@ -3,26 +3,43 @@
     <head>
         <meta charset="UTF-8" />
         <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Martian+Mono:wght@100;300;400;500;700&family=Space+Mono:wght@400;700&display=swap"
+            rel="stylesheet"
+        />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
         <title>Vite + TS</title>
     </head>
     <body>
         <div id="app">
             <canvas id="root"> </canvas>
-            <div class="preview js-start-preview">
-                <div class="preview__content">
-                    <button class="btn btn--upper js-start-game">start</button>
-                </div>
-            </div>
-            <div class="menu menu--hidden js-menu">
-                <ul class="menu__list">
-                    <li class="menu__item">
-                        <button class="btn js-ui-create-tower">
-                            <img class="image image--hidden" src="./assets/cross-icon.png" alt="Tower icon" />
-                            <img class="image image--hidden" src="./assets/t-icon.png" alt="Tower icon" />
-                        </button>
+            <div class="stats">
+                <ul class="stats__list">
+                    <li class="stats__item">
+                        <div class="stats__property">Health</div>
+                        <div class="stats__property js-health-stat">-</div>
+                    </li>
+                    <li class="stats__item">
+                        <div class="stats__property">Enemies</div>
+                        <div class="stats__property js-target-stat">-</div>
                     </li>
                 </ul>
+            </div>
+            <div class="menu js-menu">
+                <div class="menu__inner">
+                    <button class="btn btn--upper js-start-game">start</button>
+                    <ul class="menu__list js-disabled">
+                        <li class="menu__item">
+                            <button class="btn js-ui-create-tower">
+                                <img class="image image--hidden" src="./cross-icon.png" alt="Tower icon" />
+                                <img class="image image--hidden" src="./blocks.png" alt="Tower icon" />
+                            </button>
+                        </li>
+                    </ul>
+                </div>
             </div>
             <div id="restart-modal" aria-modal="true" role="dialogue" class="modal">
                 <div class="modal__content">
@@ -31,7 +48,7 @@
             </div>
             <div id="victory-modal" aria-modal="true" role="dialogue" class="modal">
                 <div class="modal__content">
-                    <h2>Victory!</h2>
+                    <h2 class="title">Victory!</h2>
                     <button class="btn btn--upper js-victory-game">Play again</button>
                 </div>
             </div>

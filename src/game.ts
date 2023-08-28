@@ -6,10 +6,8 @@ import {
     Raycaster,
     WebGLRenderer,
     PerspectiveCamera,
-    MeshBasicMaterial,
     Mesh,
     Vector3,
-    PlaneGeometry,
     Group,
     Fog
 } from 'three';
@@ -84,16 +82,21 @@ class Game {
         this.gui = null;
         this.guiParameters = {};
 
+        this.updateUIStats();
         this.setupGame();
         this.loadModels();
-        this.setupGUI();
-        this.setupPreviewSettings();
         this.mainLoop();
 
         this.dracoLoader.setDecoderPath('/draco/');
         this.loader.setDRACOLoader(this.dracoLoader);
     }
 
+    updateUIStats = (health?: number, targets?: number) => {
+        document.body.querySelector('.js-health-stat')!.textContent = `${health ?? this.state.totalHealth}`;
+        document.body.querySelector('.js-target-stat')!.textContent = `${targets ?? this.targets.amount}`;
+    };
+
+    /** Start the game by sending enemies */
     startSendingTargets = () => {
         if (!this.interalTargetsID) {
             this.interalTargetsID = setInterval(() => {
@@ -102,7 +105,9 @@ class Game {
         }
     };
 
+    /** Restart the game by reseting the settings */
     restartGame = () => {
+        this.updateUIStats(3, 10);
         this.state.resetHealth();
         this.targets.resetTargetSystem();
         this.towers.resetTowerSystem();
@@ -113,21 +118,6 @@ class Game {
     /** Start game by updating game settings */
     startGame = () => {
         this.state.notifyObservers('preview');
-    };
-
-    /** Setup settings before the start of the game */
-    setupPreviewSettings = () => {
-        // if (!this.state.active) {
-        //     this.controls.enableZoom = false;
-        //     this.controls.enablePan = false;
-        //     this.controls.enableRotate = false;
-        //     this.controls.autoRotate = true;
-        // } else {
-        //     this.controls.enableZoom = true;
-        //     this.controls.enablePan = true;
-        //     this.controls.enableRotate = true;
-        //     this.controls.autoRotate = false;
-        // }
     };
 
     /** Setup GUI tooling */
@@ -158,14 +148,10 @@ class Game {
         this.setupRenderer();
         this.setupRaycaster();
         this.setupOrbitControls();
-        this.state.addSubscriptions(
-            'preview',
-            this.state.updateGameState,
-            this.setupPreviewSettings,
-            this.startSendingTargets
-        );
+        this.state.addSubscriptions('preview', this.state.updateGameState, this.startSendingTargets);
     };
 
+    /** Setup scene */
     setupScene = () => {
         this.scene.background = new Color('#279EFF');
     };
@@ -204,15 +190,15 @@ class Game {
     setupScenePath() {
         this.path.updateInitialPoint(new Vector3(15, 0, -9));
         this.path
-            .go('left', 4) // -
-            .go('forward', 8) // -
-            .go('left', 3) // +
-            .go('backward', 3) // +
+            .go('left', 4)
+            .go('forward', 8)
+            .go('left', 3)
+            .go('backward', 3)
             .go('left', 3)
             .go('forward', 3)
-            .go('left', 4) // +
+            .go('left', 4)
             .go('backward', 9)
-            .go('right', 5) // +
+            .go('right', 5)
             .output();
     }
 
@@ -224,7 +210,7 @@ class Game {
 
     /** Load all scene models and store */
     loadModels = () => {
-        ['lego_water', 'lego_boat', 'lego_cannon', 'lego_crystall', 'lego_map'].forEach((key: string) => {
+        ['water', 'boat', 'cannon', 'crystall', 'map'].forEach((key: string) => {
             this.loader.load(`/${key}.glb`, (gltf) => {
                 this.models[key] = gltf;
                 this.adjustModelSettings(key, gltf);
@@ -244,7 +230,7 @@ class Game {
             g.position.y = 0.5;
 
             for (let i = 0; i < 64; i++) {
-                const mesh = this.models['lego_water']!.scenes[0].clone();
+                const mesh = this.models['water']!.scenes[0].clone();
                 const water = new WaterBlock(mesh, i, ['x', i], ['z', 0]);
                 g.add(water.mesh);
             }
@@ -256,7 +242,7 @@ class Game {
     /** Adjust model settings depending on a model */
     adjustModelSettings = (key: string, model: GLTF) => {
         switch (key) {
-            case 'lego_map':
+            case 'map':
                 const centerVector = this.utils.getBoxCenter(
                     model.scenes[0].children.find((child: any) => child.name.includes('Base'))!
                 );
@@ -267,36 +253,26 @@ class Game {
                 this.controls.target.set(centerVector.x, 0, centerVector.y);
                 this.controls.update();
                 this.towers.addBases(
-                    this.models['lego_map']!.scenes[0].children.filter((child) => child.name.includes('Tower_point'))
+                    this.models['map']!.scenes[0].children.filter((child) => child.name.includes('Tower_point'))
                 );
                 this.towers.applyTowersToBases();
                 this.setupScenePath();
                 break;
-            case 'lego_cannon':
+            case 'cannon':
                 const mesh = model.scenes[0].children.find((mesh) => mesh.name.includes('Shoot'))! as Mesh<any, any>;
                 mesh.material.transparent = true;
                 mesh.material.opacity = 0;
                 break;
-            case 'lego_crystall':
+            case 'crystall':
                 this.towers.assignPointer(model.scenes[0]);
                 break;
-            case 'lego_boat':
+            case 'boat':
                 model.scenes[0].scale.set(0.85, 0.85, 0.85);
                 break;
             default:
                 return;
         }
     };
-
-    test() {
-        const cube = new Mesh(
-            new PlaneGeometry(2, 2),
-            new MeshBasicMaterial({ color: 'yellow', transparent: true, opacity: 0.2 })
-        );
-        cube.rotation.x = -Math.PI / 2;
-        cube.position.y = 0.5;
-        this.scene.add(cube);
-    }
 
     /** Main game loop */
     mainLoop = () => {
