@@ -1,4 +1,4 @@
-import { AmbientLight, DirectionalLight, Color, DirectionalLightHelper } from 'three';
+import { AmbientLight, DirectionalLight, Color } from 'three';
 
 import Game from './game';
 
