@@ -90,7 +90,7 @@ class TowerSystem {
     addPointerOverTower = (value: boolean, position?: Vector3) => {
         if (value && position && !this.pointer!.userData.added) {
             this.pointer!.userData.added = true;
-            this.pointer!.position.set(position.x, position.y + 3, position.z);
+            this.pointer!.position.set(position.x, position.y + 6, position.z);
             this.game.scene.add(this.pointer!);
             this.pointerAnimation();
         }
