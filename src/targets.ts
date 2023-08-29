@@ -231,7 +231,7 @@ class TargetSystem {
                 this.game.scene.remove(target.mesh);
                 window.cancelAnimationFrame(target.targetFrameId!);
                 reduceHealth && this.game.state.reduceHealth();
-                this.game.state.addMoney(10);
+                !reduceHealth && this.game.state.addMoney(10);
                 this.game.updateUIStats();
                 return false;
             }
