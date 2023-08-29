@@ -36,10 +36,55 @@ class GameState {
 
     addMoney = (value: number) => {
         this.money += value;
+
+        if (this.money >= 50) {
+            this.updateUIButtons(false);
+        }
+    };
+
+    resetState = () => {
+        this.globalState = 'default';
+        this.totalHealth = 3;
+        this.money = 50;
+    };
+
+    updateUIButtons = (value: boolean) => {
+        (document.body.querySelector('.js-ui-create-tower')! as HTMLButtonElement).disabled = value;
+        (document.body.querySelector('.js-ui-upgrade-tower')! as HTMLButtonElement).disabled = value;
+    };
+
+    payForImprovement = () => {
+        this.money -= 50;
+        this.game.updateUIStats();
+
+        if (this.money < 50) {
+            this.updateUIButtons(true);
+
+            if (this.globalState === 'creation') {
+                this.game.events.toggleCreationMenu({
+                    elem: document.body.querySelector('.js-tower-active')!,
+                    globalState: 'default'
+                });
+                this.game.towers.addPointerOverTower(false);
+            }
+        }
     };
 
     payForTower = () => {
         this.money -= 50;
+        this.game.updateUIStats();
+
+        if (this.money < 50) {
+            this.updateUIButtons(true);
+
+            if (this.globalState === 'creation') {
+                this.game.events.toggleCreationMenu({
+                    elem: document.body.querySelector('.js-tower-active')!,
+                    globalState: 'default'
+                });
+                this.game.towers.addPointerOverTower(false);
+            }
+        }
     };
 
     /** Reduce the total health on the current map */
@@ -61,9 +106,15 @@ class GameState {
     updateGlobalState = (value: typeof this.globalState) => {
         this.globalState = value;
 
-        if (value === 'creation') this.game.towers.toggleTowersRange(1);
+        if (value === 'creation') {
+            this.game.towers.toggleTowersRange(1);
+            this.game.towers.toggleTools(true);
+        }
 
-        if (value === 'default') this.game.towers.toggleTowersRange(0);
+        if (value === 'default') {
+            this.game.towers.toggleTowersRange(0);
+            this.game.towers.toggleTools(false);
+        }
     };
 
     /** Update the draggable object and start moving event */

@@ -109,8 +109,8 @@ class Game {
     /** Restart the game by reseting the settings */
     restartGame = () => {
         this.toggleUI();
+        this.state.resetState();
         this.updateUIStats(3, 30, 50);
-        this.state.resetHealth();
         this.targets.resetTargetSystem();
         this.towers.resetTowerSystem();
 
@@ -126,6 +126,12 @@ class Game {
     setupGUI = () => {
         if (this.state.devmode) {
             this.gui = new GUI();
+
+            const lightfolder = this.gui.addFolder('light');
+            lightfolder.add(this.lights.directionalLight.position, 'x').min(-20).max(20).step(0.01);
+            lightfolder.add(this.lights.directionalLight.position, 'y').min(-20).max(20).step(0.01);
+            lightfolder.add(this.lights.directionalLight.position, 'z').min(-20).max(20).step(0.01);
+            lightfolder.add(this.lights.directionalLight.rotation, 'y').min(-20).max(20).step(0.01);
 
             /** scene */
             const folderScene = this.gui.addFolder('scene');
@@ -143,6 +149,10 @@ class Game {
         }
     };
 
+    closeModal = () => {
+        document.body.querySelector('#rules-modal')!.classList.remove('js-modal-show');
+    };
+
     /** Main game setup */
     setupGame = () => {
         this.setupScene();
@@ -150,7 +160,7 @@ class Game {
         this.setupRenderer();
         this.setupRaycaster();
         this.setupOrbitControls();
-        this.state.addSubscriptions('preview', this.state.updateGameState, this.startSendingTargets);
+        this.state.addSubscriptions('preview', this.state.updateGameState, this.closeModal, this.startSendingTargets);
     };
 
     /** Setup scene */
@@ -184,7 +194,8 @@ class Game {
     /** Setup intial orbit control settings */
     setupOrbitControls = () => {
         this.controls.rotateSpeed = 0.7;
-        this.controls.maxPolarAngle = Math.PI / 2.2;
+        this.controls.enablePan = false;
+        this.controls.maxPolarAngle = Math.PI / 3;
 
         this.controls.update();
     };
@@ -258,6 +269,9 @@ class Game {
                 this.scene.add(model.scenes[0]);
                 this.controls.target.set(centerVector.x, 0, centerVector.y);
                 this.controls.update();
+                this.towers.addTools(
+                    this.models['map']!.scenes[0].children.filter((child) => child.name.includes('Tools'))
+                );
                 this.towers.addBases(
                     this.models['map']!.scenes[0].children.filter((child) => child.name.includes('Tower_point'))
                 );

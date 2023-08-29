@@ -11,7 +11,7 @@
         />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-        <title>Vite + TS</title>
+        <title>TD Game</title>
     </head>
     <body>
         <div id="app">
@@ -27,19 +27,57 @@
                         <div class="stats__property js-target-stat">-</div>
                     </li>
                     <li class="stats__item">
-                        <div class="stats__property">Money</div>
+                        <div class="stats__property">Coins</div>
                         <div class="stats__property js-money-stat">-</div>
                     </li>
                 </ul>
             </div>
+            <div class="rules-toggler">
+                <button class="btn btn--width js-show-rules">Rules</button>
+            </div>
+            <div id="rules-modal" aria-modal="true" role="dialogue" class="modal">
+                <div class="modal__content">
+                    <button class="btn rules--close js-close-rules">
+                        <img class="image" src="./cross-icon.png" />
+                    </button>
+                    <h2 class="title">Rules</h2>
+                    <div class="rules">
+                        <ul class="rules__list">
+                            <li class="rules__item">
+                                The goal of the game is to defend the base. If you lose all the health points, the game
+                                is over. You're going to win, if you will be able to defeat all the enemies without
+                                losing all the health points. You can build towers at three different location. You can
+                                also upgrade the towers. The upgrade affects all the towers. Here are some tips:
+                            </li>
+                            <li class="rules__item">
+                                <div class="rules__property">Tower cost</div>
+                                <div class="rules__value">50 coins</div>
+                            </li>
+                            <li class="rules__item">
+                                <div class="rules__property">Tower upgrade</div>
+                                <div class="rules__value">50 coins</div>
+                            </li>
+                            <li class="rules__item">
+                                <div class="rules__property">Enemy value</div>
+                                <div class="rules__value">10 coins</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
             <div class="menu js-menu">
                 <div class="menu__inner">
-                    <button class="btn btn--upper js-start-game">start</button>
+                    <button class="btn js-start-game">start</button>
                     <ul class="menu__list js-disabled">
                         <li class="menu__item">
                             <button class="btn js-ui-create-tower">
-                                <img class="image image--hidden" src="./cross-icon.png" alt="Tower icon" />
-                                <img class="image image--hidden" src="./blocks.png" alt="Tower icon" />
+                                <img class="image image--hidden" src="./cross-icon.png" />
+                                <img class="image image--hidden" src="./blocks.png" />
+                            </button>
+                        </li>
+                        <li class="menu__item">
+                            <button class="btn js-ui-upgrade-tower">
+                                <img class="image" src="./up.png" />
                             </button>
                         </li>
                     </ul>
@@ -48,13 +86,13 @@
             <div id="restart-modal" aria-modal="true" role="dialogue" class="modal">
                 <div class="modal__content">
                     <h2 class="title">Wanna give another try?</h2>
-                    <button class="btn btn--upper js-restart-game">restart</button>
+                    <button class="btn js-restart-game">restart</button>
                 </div>
             </div>
             <div id="victory-modal" aria-modal="true" role="dialogue" class="modal">
                 <div class="modal__content">
                     <h2 class="title">Victory!</h2>
-                    <button class="btn btn--upper js-victory-game">play again</button>
+                    <button class="btn js-victory-game">play again</button>
                 </div>
             </div>
         </div>

@@ -240,7 +240,8 @@ class TargetSystem {
         });
 
         if (
-            this.targets.length === 0 &&
+            this.targets.length <= 0 &&
+            this.amount <= 0 &&
             this.game.state.totalHealth > 0 &&
             !document.body.querySelector('.js-modal-show')
         ) {

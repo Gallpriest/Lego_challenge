@@ -22,6 +22,7 @@
 }
 
 .btn {
+    width: fit-content;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -37,8 +38,13 @@
     box-shadow: var(--shadow);
 }
 
-.btn--uppercase {
-    text-transform: uppercase;
+.btn:disabled {
+    pointer-events: none;
+    background-color: var(--color-disabled);
+}
+
+.btn--width {
+    width: 100%;
 }
 
 .js-ui-create-tower:not(.js-tower-active) > .image:nth-child(2) {
@@ -59,9 +65,22 @@
 }
 
 .stats {
+    width: 250px;
     position: absolute;
     left: var(--space-x3);
     top: var(--space-x3);
+    background-color: var(--color-background-2);
+    border: var(--border-default);
+    border-radius: var(--border-radius);
+    padding: var(--space-x3);
+    box-shadow: var(--shadow);
+}
+
+.rules-toggler {
+    width: 250px;
+    position: absolute;
+    left: var(--space-x3);
+    bottom: var(--space-x3);
     background-color: var(--color-background-2);
     border: var(--border-default);
     border-radius: var(--border-radius);
@@ -92,6 +111,7 @@
     font-weight: var(--font-weight-700);
     line-height: 26px;
     padding: var(--space-x2);
+    min-width: 60px;
     border: var(--border-default);
     border-radius: var(--border-radius);
 }
@@ -147,10 +167,6 @@
     margin: 0;
 }
 
-.menu__item:not(:first-child) {
-    margin-left: var(--space-x3);
-}
-
 .modal {
     display: none;
     position: absolute;
@@ -168,6 +184,7 @@
 
 .modal__content {
     display: flex;
+    align-items: center;
     flex-direction: column;
     padding: var(--space-x3);
 }
@@ -179,6 +196,42 @@
     font-weight: var(--font-weight-700);
     line-height: 32px;
     margin-bottom: var(--space-x3);
+}
+
+.rules__list {
+    margin: 0;
+    padding: 0;
+}
+
+.rules__item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-x2);
+    list-style: none;
+    margin: var(--space-x2);
+    padding: 0;
+}
+
+.rules--close {
+    position: absolute;
+    right: var(--space-x3);
+    top: var(--space-x3);
+}
+
+.rules__property {
+    width: 200px;
+    text-align: center;
+    padding: var(--space-x2);
+    font-size: var(--font-large);
+    border: var(--border-default);
+    border-radius: var(--border-radius);
+    background-color: var(--color-background-1);
+}
+
+.rules__value {
+    margin-left: var(--space-x3);
+    text-decoration: underline;
+    font-size: var(--font-large);
 }
 
 .js-modal-show {

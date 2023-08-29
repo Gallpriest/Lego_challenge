@@ -2,9 +2,7 @@ import Game from './game';
 
 type MenuToggleOptions = {
     elem: HTMLElement;
-    fromMenu: boolean;
     globalState: Game['state']['globalState'];
-    toggleState: boolean;
 };
 
 class GameEvents {
@@ -23,6 +21,7 @@ class GameEvents {
         const menu = document.body.querySelector('.js-menu') as HTMLDivElement;
         const restartBtn = document.body.querySelector('.js-restart-game') as HTMLButtonElement;
         const playAgainBtn = document.body.querySelector('.js-victory-game') as HTMLButtonElement;
+        const upgradeButton = document.body.querySelector('.js-ui-upgrade-tower') as HTMLButtonElement;
 
         window.addEventListener('resize', this.resizeListener);
         window.addEventListener('pointermove', this.raycasterGameListener);
@@ -32,7 +31,15 @@ class GameEvents {
         menu.addEventListener('pointerup', this.towerCreateListener);
         restartBtn.addEventListener('pointerup', this.restartPointerListener);
         playAgainBtn.addEventListener('pointerup', this.victoryPointerListener);
+        upgradeButton.addEventListener('pointerup', this.upgradeTowers);
     }
+
+    /** Upgrade towers listener */
+    upgradeTowers = () => {
+        if (this.game.state.money >= 50) {
+            this.game.towers.improveTowerStats();
+        }
+    };
 
     /** Restart the game listener */
     restartPointerListener = () => {
@@ -69,7 +76,7 @@ class GameEvents {
         const elem = document.body.querySelector('.js-tower-active') as HTMLElement;
 
         if (elem) {
-            this.toggleCreationMenu({ elem, fromMenu: false, globalState: 'default', toggleState: false });
+            this.toggleCreationMenu({ elem, globalState: 'default' });
         }
     };
 
@@ -88,9 +95,7 @@ class GameEvents {
         if (elem.closest('.js-tower-active')) {
             this.toggleCreationMenu({
                 elem: elem.closest('.js-ui-create-tower')!,
-                fromMenu: true,
-                globalState: 'default',
-                toggleState: false
+                globalState: 'default'
             });
 
             return;
@@ -99,9 +104,7 @@ class GameEvents {
         if (elem.closest('.js-ui-create-tower')) {
             this.toggleCreationMenu({
                 elem: elem.closest('.js-ui-create-tower')!,
-                fromMenu: true,
-                globalState: 'creation',
-                toggleState: true
+                globalState: 'creation'
             });
 
             return;

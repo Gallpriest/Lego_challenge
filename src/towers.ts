@@ -21,6 +21,7 @@ import { Target } from './targets';
 class TowerSystem {
     game: Game;
     bases: Object3D<Event>[];
+    tools: Object3D<Event>[];
     activeBase: Mesh | null;
     activeTower: Tower | null;
     towers: Record<string, Tower> = {};
@@ -33,6 +34,7 @@ class TowerSystem {
     constructor(game: Game) {
         this.game = game;
         this.bases = [];
+        this.tools = [];
         this.pointer = null;
         this.activeBase = null;
         this.activeTower = null;
@@ -45,6 +47,8 @@ class TowerSystem {
         for (const key in this.towers) {
             this.towers[key].attackSpeed -= 125;
         }
+
+        this.game.state.payForImprovement();
     };
 
     /** Reset all towers and settings */
@@ -86,7 +90,7 @@ class TowerSystem {
     addPointerOverTower = (value: boolean, position?: Vector3) => {
         if (value && position && !this.pointer!.userData.added) {
             this.pointer!.userData.added = true;
-            this.pointer!.position.set(position.x, 4, position.z);
+            this.pointer!.position.set(position.x, position.y + 3, position.z);
             this.game.scene.add(this.pointer!);
             this.pointerAnimation();
         }
@@ -97,6 +101,10 @@ class TowerSystem {
             window.cancelAnimationFrame(this.pointerFrameId!);
             this.pointerFrameId = null;
         }
+    };
+
+    removePointer = () => {
+        this.game.scene.remove(this.pointer!);
     };
 
     /** Update the active tower material while dragging over the scene and bases */
@@ -128,27 +136,62 @@ class TowerSystem {
         this.bases = meshes;
     }
 
+    addTools = (meshes: Object3D<Event>[]) => {
+        this.tools = meshes;
+    };
+
+    toggleTools = (value: boolean) => {
+        this.tools.forEach((mesh) => {
+            const tool = mesh as Group;
+            const base = this.bases.find((b) => b.uuid === tool.userData.base)!;
+
+            if (!base.userData.occupied) {
+                tool.traverse((o) => {
+                    o.visible = value;
+                });
+            }
+        });
+    };
+
     /** Initialize a new tower instance and add its model to the scene */
     applyTowersToBases = () => {
-        this.bases.forEach((mesh) => {
-            mesh.userData = { occupied: false };
+        this.bases.forEach((mesh, idx) => {
             (mesh as Mesh<any, any>).material = new MeshBasicMaterial({
                 color: 'white',
                 transparent: true,
                 opacity: 0
             });
 
+            this.tools[idx].userData = { base: mesh.uuid };
+
             const { x, y, z } = this.game.utils.getBoxCenter(mesh);
             const tower = new Tower(this).prepareTower(x, y - 0.95, z);
-            mesh.userData = { towerId: tower.uuid };
+            mesh.userData = { towerId: tower.uuid, occupied: false };
 
             this.addTower(tower);
         });
+
+        this.game.towers.toggleTools(false);
     };
 
     /** Exclude the base after placing a tower on it */
     excludeBase = (uuid: string) => {
-        this.bases.find((base) => base.userData.towerId === uuid)!.userData.occupied = true;
+        let baseUuid = '';
+        this.bases.find((base) => {
+            if (base.userData.towerId === uuid) {
+                baseUuid = base.uuid;
+                return base;
+            }
+        })!.userData.occupied = true;
+
+        this.tools
+            .find((tool) => {
+                console.log(tool.userData.base);
+                return tool.userData.base === baseUuid;
+            })!
+            .traverse((o) => {
+                o.visible = false;
+            });
     };
 }
 
@@ -194,7 +237,14 @@ class Tower {
         this.model.scale.set(1, 1, 1);
         this.system.excludeBase(this.uuid);
         this.toggleRangeGroup(1);
+        this.updateTowerSettings();
         this.towerLoop();
+    };
+
+    updateTowerSettings = () => {
+        if (Object.keys(this.system.towers).length) {
+            this.attackSpeed = Object.values(this.system.towers)[0].attackSpeed;
+        }
     };
 
     toggleRangeGroup = (value: number) => {
@@ -368,7 +418,7 @@ class Projectile {
             x: this.tower.focusedTarget!.mesh.position.x,
             y: this.tower.focusedTarget!.mesh.position.y,
             z: this.tower.focusedTarget!.mesh.position.z,
-            duration: 0.75,
+            duration: 0.4,
             onComplete: () => {
                 if (
                     this.tower.focusedTarget &&

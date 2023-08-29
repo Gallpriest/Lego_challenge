@@ -1,4 +1,4 @@
-import { AmbientLight, DirectionalLight, Color } from 'three';
+import { AmbientLight, DirectionalLight, Color, DirectionalLightHelper } from 'three';
 
 import Game from './game';
 
@@ -23,7 +23,7 @@ class GameLights {
 
     /** Add ambient light */
     addAmbientLight = () => {
-        this.ambientLight.intensity = 0.4;
+        this.ambientLight.intensity = 0.1;
 
         this.game.scene.add(this.ambientLight);
     };
@@ -32,7 +32,8 @@ class GameLights {
     addDirectionalLight = () => {
         this.directionalLight.intensity = 1;
         this.directionalLight.color = new Color('white');
-        this.directionalLight.position.set(5.3, 1.5, 4.2);
+        this.directionalLight.position.set(-14, 10, 1.5);
+        this.directionalLight.rotation.y = 3.14;
 
         this.game.scene.add(this.directionalLight);
     };
